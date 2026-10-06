@@ -801,5 +801,49 @@
             }, 300);
         }
     </script>
+ (() => {
+      const music = document.getElementById('wedding-bg-music');
+      const button = document.getElementById('wedding-music-toggle');
+      const label = document.getElementById('wedding-music-label');
+      let userPaused = false;
+      music.volume = 0.4;
+      function updateButton() {
+        const playing = !music.paused;
+        label.textContent = playing ? '暫停音樂' : '播放音樂';
+        button.setAttribute('aria-label', playing ? '暫停背景音樂' : '播放背景音樂');
+        button.setAttribute('aria-pressed', String(playing));
+      }
+      function tryPlay() {
+        if (userPaused || !music.paused) return;
+        const attempt = music.play();
+        if (attempt) attempt.catch(() => updateButton());
+      }
+      music.addEventListener('play', updateButton);
+      music.addEventListener('pause', updateButton);
+      music.addEventListener('error', () => {
+        label.textContent = '音樂載入失敗';
+        button.setAttribute('aria-label', '重新嘗試播放背景音樂');
+      });
+      button.addEventListener('click', () => {
+        if (music.paused) {
+          userPaused = false;
+          tryPlay();
+        } else {
+          userPaused = true;
+          music.pause();
+        }
+      });
+      // 點擊頁面或使用鍵盤時，立即在使用者互動中呼叫 play。
+      document.addEventListener('click', event => {
+        if (!button.contains(event.target)) tryPlay();
+      });
+      document.addEventListener('keydown', event => {
+        if (!button.contains(event.target)) tryPlay();
+      });
+      tryPlay();
+    })();
+  </script>
+
+    
 </body>
 </html>
